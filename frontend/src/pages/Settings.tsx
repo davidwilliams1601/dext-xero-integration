@@ -1,190 +1,136 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
-import { settingsApi, Settings as SettingsType } from '../services/api';
+import React, { useEffect, useState } from 'react';
+import { settingsApi, Settings } from '../services/api';
 
-const Settings: React.FC = () => {
-  const [settings, setSettings] = useState<SettingsType>({
-    dextApiKey: '',
-    xeroClientId: '',
-    xeroClientSecret: '',
-    openaiApiKey: '',
-    googleCloudVisionCredentials: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+const SettingsPage: React.FC = () => {
+    const [settings, setSettings] = useState<Settings>({
+        dextApiKey: null,
+        xeroClientId: null,
+        xeroClientSecret: null,
+        openaiApiKey: null,
+        googleCloudVisionCredentials: null,
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
+    useEffect(() => {
+        loadSettings();
+    }, []);
 
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const data = await settingsApi.getSettings();
-      setSettings(data);
-    } catch (err) {
-      setError('Failed to load settings');
-      console.error('Error fetching settings:', err);
-    } finally {
-      setLoading(false);
+    const loadSettings = async () => {
+        try {
+            const data = await settingsApi.getSettings();
+            setSettings(data);
+        } catch (err) {
+            setError('Failed to load settings');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setSuccess(null);
+
+        try {
+            await settingsApi.updateSettings(settings);
+            setSuccess('Settings updated successfully');
+        } catch (err) {
+            setError('Failed to update settings');
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSettings((prev: Settings) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    if (loading) {
+        return <div>Loading...</div>;
     }
-  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSettings(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      setError(null);
-      await settingsApi.updateSettings(settings);
-      setSuccess(true);
-    } catch (err) {
-      setError('Failed to save settings');
-      console.error('Error saving settings:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleXeroAuth = async () => {
-    try {
-      const authUrl = await settingsApi.getXeroAuthUrl();
-      window.location.href = authUrl;
-    } catch (err) {
-      setError('Failed to initiate Xero authentication');
-      console.error('Error getting Xero auth URL:', err);
-    }
-  };
-
-  if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
-      </Box>
+        <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">Settings</h1>
+            
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {error}
+                </div>
+            )}
+            
+            {success && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    {success}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Dext API Key
+                    </label>
+                    <input
+                        type="password"
+                        name="dextApiKey"
+                        value={settings.dextApiKey || ''}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Xero Client ID
+                    </label>
+                    <input
+                        type="text"
+                        name="xeroClientId"
+                        value={settings.xeroClientId || ''}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Xero Client Secret
+                    </label>
+                    <input
+                        type="password"
+                        name="xeroClientSecret"
+                        value={settings.xeroClientSecret || ''}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        OpenAI API Key
+                    </label>
+                    <input
+                        type="password"
+                        name="openaiApiKey"
+                        value={settings.openaiApiKey || ''}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                    Save Settings
+                </button>
+            </form>
+        </div>
     );
-  }
-
-  return (
-    <Box p={3}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Settings
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Settings saved successfully!
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Dext API Key"
-                name="dextApiKey"
-                value={settings.dextApiKey}
-                onChange={handleChange}
-                type="password"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Xero Client ID"
-                name="xeroClientId"
-                value={settings.xeroClientId}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Xero Client Secret"
-                name="xeroClientSecret"
-                value={settings.xeroClientSecret}
-                onChange={handleChange}
-                type="password"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleXeroAuth}
-                sx={{ mr: 2 }}
-              >
-                Authenticate with Xero
-              </Button>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="OpenAI API Key"
-                name="openaiApiKey"
-                value={settings.openaiApiKey}
-                onChange={handleChange}
-                type="password"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Google Cloud Vision Credentials"
-                name="googleCloudVisionCredentials"
-                value={settings.googleCloudVisionCredentials}
-                onChange={handleChange}
-                multiline
-                rows={4}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                startIcon={<SaveIcon />}
-                disabled={loading}
-              >
-                Save Settings
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
-    </Box>
-  );
 };
 
-export default Settings; 
+export default SettingsPage; 
