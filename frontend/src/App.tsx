@@ -14,6 +14,7 @@ import {
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import Settings from './pages/Settings';
 import XeroCallback from './pages/XeroCallback';
+import Dashboard from './pages/Dashboard';
 
 const theme = createTheme({
   palette: {
@@ -41,6 +42,14 @@ const App: React.FC = () => {
               <Button
                 color="inherit"
                 component={Link}
+                to="/"
+                startIcon={<SettingsIcon />}
+              >
+                Dashboard
+              </Button>
+              <Button
+                color="inherit"
+                component={Link}
                 to="/settings"
                 startIcon={<SettingsIcon />}
               >
@@ -51,6 +60,7 @@ const App: React.FC = () => {
 
           <Container maxWidth="lg" sx={{ mt: 4 }}>
             <Routes>
+              <Route path="/" element={<Dashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/xero/callback" element={<XeroCallback />} />
               {/* Add more routes here as we create more pages */}
