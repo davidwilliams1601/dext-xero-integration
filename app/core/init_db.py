@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.core.database import engine, Base
+from app.models.settings import Settings
 from app.models.invoice import Invoice
 
 def init_db():

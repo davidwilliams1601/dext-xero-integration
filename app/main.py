@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from app.api import settings, xero
+from app.core.init_db import init_db
 
 # Load environment variables
 load_dotenv()
@@ -25,6 +26,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    # Initialize database tables
+    init_db()
 
 # Health check endpoint
 @app.get("/health")
