@@ -41,7 +41,7 @@ const SettingsPage: React.FC = () => {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setSettings((prev: Settings) => ({
             ...prev,
@@ -120,6 +120,23 @@ const SettingsPage: React.FC = () => {
                         onChange={handleChange}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Google Cloud Vision Credentials (JSON)
+                    </label>
+                    <textarea
+                        name="googleCloudVisionCredentials"
+                        value={settings.googleCloudVisionCredentials ? JSON.stringify(settings.googleCloudVisionCredentials, null, 2) : ''}
+                        onChange={handleChange}
+                        rows={10}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm"
+                        placeholder="Paste your Google Cloud Vision credentials JSON here"
+                    />
+                    <p className="mt-1 text-sm text-gray-500">
+                        This should be the contents of your Google Cloud Vision service account key file
+                    </p>
                 </div>
 
                 <button

@@ -5,7 +5,7 @@ export interface Settings {
     xeroClientId: string | null;
     xeroClientSecret: string | null;
     openaiApiKey: string | null;
-    googleCloudVisionCredentials: any | null;
+    googleCloudVisionCredentials: Record<string, any> | null;
 }
 
 export const settingsApi = {
@@ -16,12 +16,22 @@ export const settingsApi = {
     },
 
     async updateSettings(settings: Partial<Settings>): Promise<void> {
+        // Parse Google Cloud Vision credentials if it's a string
+        const updatedSettings = {
+            ...settings,
+            googleCloudVisionCredentials: settings.googleCloudVisionCredentials
+                ? typeof settings.googleCloudVisionCredentials === 'string'
+                    ? JSON.parse(settings.googleCloudVisionCredentials)
+                    : settings.googleCloudVisionCredentials
+                : null,
+        };
+
         const response = await fetch(`${API_URL}/api/settings`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(settings),
+            body: JSON.stringify(updatedSettings),
         });
         if (!response.ok) throw new Error('Failed to update settings');
     },
